@@ -11,11 +11,17 @@ public class planetManager : MonoBehaviour
   
    //Variables
    public planetPhysics planet_physics;
+   public managerSimulation ManagerSimulation;
    public float SUN_MASS;
    public float gravitationalConstant;
-
-
-
+   int simulationLength;
+   public Vector3[,] planetPositionData;
+   
+  //Functions
+  string recognizeType(float density, float Mass, Vector3 size){
+    return "";
+  }
+  
 
     //Materials
     public Material[] materials =  new Material[8];
@@ -135,6 +141,8 @@ public class planetManager : MonoBehaviour
             planetRenderer.sharedMaterial = planetMaterial;
 
             
+            
+            
       }
     }
     //Variables
@@ -143,7 +151,7 @@ public class planetManager : MonoBehaviour
     public TrailRenderer trailb;
     List<Transform> Transforms_In_Simulation;
     List<secondaryTransform> secondaryTransforms_In_Simulation;
-    List<PlanetaryOrgan> Planets_In_Simulation;
+    public List<PlanetaryOrgan> Planets_In_Simulation;
     [SerializeField] int Amount_Planets_In_Simulation;
     
     
@@ -159,12 +167,17 @@ public class planetManager : MonoBehaviour
 
     //The Touch
     void Start(){
-      SUN_MASS = 8800;
-            Sun sun = new(testPrefab,SUN_MASS);
-             Amount_Planets_In_Simulation = 50;//Random.Range(9,25);
+             SUN_MASS = 8800;
+             Sun sun = new(testPrefab,SUN_MASS);
+             Amount_Planets_In_Simulation = 12;//Random.Range(9,25);
              Transforms_In_Simulation = new List<Transform>();
              secondaryTransforms_In_Simulation = new List<secondaryTransform>();
              Planets_In_Simulation = new List<PlanetaryOrgan>();
+
+             //Simulation Manager
+             ManagerSimulation.SetSimulationLength(simulationLength);
+             print(simulationLength);
+             planetPositionData = new Vector3[Amount_Planets_In_Simulation,simulationLength];
              
              for (int i = 0; i < Amount_Planets_In_Simulation; i++){
               //Debug
@@ -173,18 +186,18 @@ public class planetManager : MonoBehaviour
               PlanetaryOrgan planet = new(testPrefab,$"{i}",material1,sun.mass,gravitationalConstant);
                             
               //trail
-              TrailRenderer trail = Instantiate(trailb);
-              trail.transform.parent = planet.Object_Transform;
-              trail.transform.position = planet.Object_Transform.position;
+              //TrailRenderer trail = Instantiate(trailb);
+              //trail.transform.parent = planet.Object_Transform;
+              //trail.transform.position = planet.Object_Transform.position;
               
+              planetPositionData[i,0] = planet.position;
    
               Transforms_In_Simulation.Add(planet.Object_Transform);
               secondaryTransforms_In_Simulation.Add(planet.Object_secondary_Transform);
               Planets_In_Simulation.Add(planet);
              }
-            
-            planet_physics.Ask_For_Transforms_In_Simulation(Transforms_In_Simulation,Planets_In_Simulation);
-            planet_physics.Ask_For_secondaryTransforms_In_Simulation(secondaryTransforms_In_Simulation, sun.Sun_secondary_transform);
+             planet_physics.Ask_For_SimulationData(Transforms_In_Simulation,Planets_In_Simulation,secondaryTransforms_In_Simulation,SUN_MASS,planetPositionData);
+             ManagerSimulation.GetPlanetData(Planets_In_Simulation, Amount_Planets_In_Simulation);
           
           
     }      

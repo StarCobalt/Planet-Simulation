@@ -8,15 +8,15 @@ public class planetPhysics : MonoBehaviour{
     
     //Variable/Fields
 
-    public float timeVar; 
+    int simulationLength; 
     public planetManager PlanetManager; 
-    planetEncountant planet_ecountant;
+    public managerSimulation ManagerSimulation;
     public int Number_Planets_In_Simulation;
     public List<Transform> Transforms_In_Simulation;
     public List<planetManager.secondaryTransform> secondaryTransforms_In_Simulation;
-    public planetManager.secondaryTransform Sun_secondaryTransform;
+    public float SunMass;
     public List<planetManager.PlanetaryOrgan> Planets_In_Simulation;
-    
+    public Vector3[,] planetPositionData;
     //Delegates/Events
     
     //public event Action<planetManager.secondaryTransform, planetManager.secondaryTransform, GameObject> OnPlanetInbound;
@@ -31,17 +31,17 @@ public class planetPhysics : MonoBehaviour{
 
 
   //Functions
-    float calculateGravity(planetManager.secondaryTransform a, planetManager.secondaryTransform b, Transform ap, Transform bp){
+    float calculateGravity(float amass, float bmass, Vector3 aposition, Vector3 bposition, Vector3 differencebetweenAB, Vector3 ascale, Vector3 bscale){
        
        //Operatives
-        float distanceBetweenCenters = (bp.position - ap.position).magnitude; //find distance
-        float diameterBetweenCenters = (ap.localScale.x + bp.localScale.x)/2; //add radii
+        float distanceBetweenCenters = differencebetweenAB.magnitude; //find distance
+        float diameterBetweenCenters = (ascale.x + bscale.x)/2; //add radii
         float gravitationForce = -9000;
 
         if (distanceBetweenCenters > diameterBetweenCenters){
           //Gravity
-          float distanceBetweenCentersSqr = (bp.position - ap.position).sqrMagnitude;
-          float CollectiveMass = a.mass * b.mass;
+          float distanceBetweenCentersSqr = differencebetweenAB.sqrMagnitude;
+          float CollectiveMass = amass * bmass;
            gravitationForce = (PlanetManager.gravitationalConstant * CollectiveMass) / distanceBetweenCentersSqr;
           //Debug
           //print($"gravitationForce : \n{gravitationForce}");
@@ -52,42 +52,41 @@ public class planetPhysics : MonoBehaviour{
         return gravitationForce; 
     }
 
-    public void Ask_For_Transforms_In_Simulation(List<Transform> Transforms_InSimulation, List<planetManager.PlanetaryOrgan> Planets_InSimulation){
+    public void Ask_For_SimulationData(List<Transform> Transforms_InSimulation, List<planetManager.PlanetaryOrgan> Planets_InSimulation,List<planetManager.secondaryTransform> secondaryTransforms_InSimulation,float sunMass, Vector3[,] planetposdata){
+                
         Transforms_In_Simulation = Transforms_InSimulation;
-        Number_Planets_In_Simulation = Transforms_In_Simulation.Count ;
+	      secondaryTransforms_In_Simulation = secondaryTransforms_InSimulation;
         Planets_In_Simulation = Planets_InSimulation;
+        SunMass = sunMass;
+        
+        Number_Planets_In_Simulation = Transforms_In_Simulation.Count;	   
+        simulationLength = planetposdata.GetLength(1);
+        planetPositionData = planetposdata;
     }
-
-    public void Ask_For_secondaryTransforms_In_Simulation(List<planetManager.secondaryTransform> secondaryTransforms_InSimulation,planetManager.secondaryTransform Sun_st){
-      secondaryTransforms_In_Simulation = secondaryTransforms_InSimulation;
-      Sun_secondaryTransform = Sun_st;
+    void SetplanetPositionData(Vector3 position, int planet, int simulationTimeStep){
+      planetPositionData[planet, simulationTimeStep] = position;
     }
+    
 
 
   //Physics
-    void FixedUpdate()
-    {
-      bool GameOn = true;
-
-        if (Input.GetKeyDown(KeyCode.Space)){
-          GameOn = !GameOn;
-          //Debug
-          //print($"Game On :{GameOn}, It is now {Time.fixedTime}");
-        }
+  void Start(){
+    
+     for(int simulationTimeStep = 1; simulationTimeStep < simulationLength; simulationTimeStep++){
+    
       
-        if (!GameOn){
-          //Just In case I want to put some information for pausing simulations
-        }
-        else if(GameOn){
-          
             for(int i = 0; i < Number_Planets_In_Simulation;i++){
            
               //Variables
            
               planetManager.secondaryTransform a = secondaryTransforms_In_Simulation[i];
               Transform ap = Transforms_In_Simulation[i];
-            
+              
               Vector3 CurrentVelocity = new(0,0,0);
+
+              Vector3 A_prevPosition = planetPositionData[i,simulationTimeStep - 1];
+              
+              
               //Attraction Between All Bodies
             
               for (int j = 0; j < Number_Planets_In_Simulation;j++){
@@ -96,7 +95,7 @@ public class planetPhysics : MonoBehaviour{
                   if (i == j){
                     //Sun Gravity
                     //print("Gravitating");
-                    CurrentVelocity += -ap.position.normalized * PlanetManager.gravitationalConstant * (Sun_secondaryTransform.mass * a.mass/ap.position.sqrMagnitude);
+                    CurrentVelocity += -A_prevPosition.normalized * PlanetManager.gravitationalConstant * (SunMass * a.mass/A_prevPosition.sqrMagnitude);
                     continue;
                   }
 
@@ -105,22 +104,23 @@ public class planetPhysics : MonoBehaviour{
                 
                   planetManager.secondaryTransform b = secondaryTransforms_In_Simulation[j];
                   Transform bp = Transforms_In_Simulation[j];
-               
-               
+                 
+                  Vector3 B_prevPosition = planetPositionData[j,simulationTimeStep - 1];
+                  Vector3 DifferenceBetweenAB = B_prevPosition - A_prevPosition;
                
                 
 
-                float gravitationForce = calculateGravity(a,b,ap,bp);
+                float gravitationForce = calculateGravity(a.mass, b.mass, A_prevPosition, B_prevPosition, DifferenceBetweenAB,ap.localScale, bp.localScale);
                 
                 if (gravitationForce == -9000){//Something is In the Way
                     //Destroy(Planets_In_Simulation[i].mainOrgan);
                     //secondaryTransforms_In_Simulation.RemoveAt(i);
                     //Transforms_In_Simulation.RemoveAt(i);
                 }else{ 
-                    Vector3 direction = (bp.position - ap.position).normalized;
+                    Vector3 direction = DifferenceBetweenAB.normalized;
                     Vector3 PlanetForce = direction * gravitationForce;
                     CurrentVelocity += PlanetForce;
-                   // print($"PlanetForce {PlanetForce}, CurrentForce from Planet : {CurrentVelocity}, gravitation {gravitationForce}");
+                   
                 }
               }
               
@@ -133,17 +133,17 @@ public class planetPhysics : MonoBehaviour{
               //Round to The Nearest Decimal Point
               FinalAcceleration = new Vector3(Mathf.Round(FinalAcceleration.x*1000)/1000,Mathf.Round(FinalAcceleration.y*1000)/1000,Mathf.Round(FinalAcceleration.z*1000)/1000);
             
-              Debug.DrawLine(ap.position,ap.position + a.velocity * 500, Color.red);
-              Debug.DrawLine(ap.position,ap.position +CurrentVelocity * 500);
+              
               
               
               
               if (true){
-                ap.position += FinalAcceleration;
+                SetplanetPositionData(A_prevPosition + FinalAcceleration, i, simulationTimeStep);
               }
           }
-      }
-      }
+        }
+        ManagerSimulation.GetPositionData(planetPositionData);
+    }
 }
 
 
