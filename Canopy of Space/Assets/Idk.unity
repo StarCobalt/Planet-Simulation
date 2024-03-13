@@ -340,6 +340,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlanetManager: {fileID: 1579926203}
   PlanetPhysics: {fileID: 1909696142}
+  _simulationLength: 595
+  simulationYes: 0
 --- !u!4 &1440626946
 Transform:
   m_ObjectHideFlags: 0
@@ -399,6 +401,8 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 24c24ea7972933944a3a5d731f344b66, type: 2}
   testPrefab: {fileID: 919132149155446097, guid: bab917a0ae772ce4894e44381e9a75d4, type: 3}
   trailb: {fileID: 7467669242930016041, guid: d25d438912e3b9746bdb80a28aa4d5f5, type: 3}
+  Transforms_In_Simulation: []
+  secondaryTransforms_In_Simulation: []
   Amount_Planets_In_Simulation: 9
 --- !u!4 &1579926204
 Transform:
@@ -446,10 +450,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlanetManager: {fileID: 1579926203}
   ManagerSimulation: {fileID: 1440626945}
-  Number_Planets_In_Simulation: 9
   Transforms_In_Simulation: []
   secondaryTransforms_In_Simulation: []
-  SunMass: 0
+  SunMass: 8800
 --- !u!4 &1909696143
 Transform:
   m_ObjectHideFlags: 0

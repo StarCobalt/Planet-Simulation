@@ -9,7 +9,7 @@ public class managerSimulation : MonoBehaviour
     public planetManager PlanetManager;
     public planetPhysics PlanetPhysics;
     //Simulation
-    int simulationLength = 595;
+    public int _simulationLength = 100;
 
     //Planets
     public Vector3[,] planetPositionData;
@@ -19,10 +19,10 @@ public class managerSimulation : MonoBehaviour
     //Simulation Approvitations
     bool PhysicsDataRecieved = false;
     bool ManagerDataRecieved = false;
-    bool simulationYes = true;
+    public bool simulationYes = false;
     void Start()
     {
-        simulationLength = 595;
+        _simulationLength = 100;
         
     }
 
@@ -39,30 +39,20 @@ public class managerSimulation : MonoBehaviour
     }
     IEnumerator movePlanets(){
         if (PhysicsDataRecieved && ManagerDataRecieved && simulationYes){
-            for (int simulationTimeStep = 0; simulationTimeStep < simulationLength; simulationTimeStep++){
-                
-                
-                
-                
-                for (int planet = 0; planet < Number_Planets__Simulation; planet++){
-                    try{
-                    planets_In_Simulation[planet].mainOrgan.transform.position = planetPositionData[planet,simulationTimeStep];
-                    }
-                    catch(System.Exception e){
-                        print(e);
-                        print($"Final Final Index Calc - planet{planet},{planetPositionData.GetLength(0)},{Number_Planets__Simulation}\n simuationTimeStep {simulationTimeStep},{planetPositionData.GetLength(1)},{simulationLength} ");
-                    }
-                
-                
-                }
+            for (int simulationTimeStep = 0; simulationTimeStep < _simulationLength; simulationTimeStep++){
+               for (int planet = 0; planet < Number_Planets__Simulation; planet++){
+                  planets_In_Simulation[planet].mainOrgan.transform.position = planetPositionData[planet,simulationTimeStep];
+               }
+               print(simulationTimeStep);
+               yield return null;
             }
         }   
-        yield return new WaitForSeconds(1.21f);
+        
     }
     //Simulation Manager
 
-    public void SetSimulationLength(int SimulationLength){
-        SimulationLength = simulationLength;
+    public int SetSimulationLength(){
+        return _simulationLength;
     }
     public void GetPositionData(Vector3[,] PlanetPositionData){
         planetPositionData = PlanetPositionData;

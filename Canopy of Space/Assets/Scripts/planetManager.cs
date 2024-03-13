@@ -149,8 +149,8 @@ public class planetManager : MonoBehaviour
     
    
     public TrailRenderer trailb;
-    List<Transform> Transforms_In_Simulation;
-    List<secondaryTransform> secondaryTransforms_In_Simulation;
+    public List<Transform> Transforms_In_Simulation;
+    public List<secondaryTransform> secondaryTransforms_In_Simulation;
     public List<PlanetaryOrgan> Planets_In_Simulation;
     [SerializeField] int Amount_Planets_In_Simulation;
     
@@ -169,13 +169,13 @@ public class planetManager : MonoBehaviour
     void Start(){
              SUN_MASS = 8800;
              Sun sun = new(testPrefab,SUN_MASS);
-             Amount_Planets_In_Simulation = 12;//Random.Range(9,25);
+             Amount_Planets_In_Simulation = Random.Range(9,25);
              Transforms_In_Simulation = new List<Transform>();
              secondaryTransforms_In_Simulation = new List<secondaryTransform>();
              Planets_In_Simulation = new List<PlanetaryOrgan>();
 
              //Simulation Manager
-             ManagerSimulation.SetSimulationLength(simulationLength);
+             simulationLength = ManagerSimulation.SetSimulationLength();
              print(simulationLength);
              planetPositionData = new Vector3[Amount_Planets_In_Simulation,simulationLength];
              
@@ -186,9 +186,9 @@ public class planetManager : MonoBehaviour
               PlanetaryOrgan planet = new(testPrefab,$"{i}",material1,sun.mass,gravitationalConstant);
                             
               //trail
-              //TrailRenderer trail = Instantiate(trailb);
-              //trail.transform.parent = planet.Object_Transform;
-              //trail.transform.position = planet.Object_Transform.position;
+              TrailRenderer trail = Instantiate(trailb);
+              trail.transform.parent = planet.Object_Transform;
+              trail.transform.position = planet.Object_Transform.position;
               
               planetPositionData[i,0] = planet.position;
    

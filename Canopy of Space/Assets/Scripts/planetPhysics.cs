@@ -11,7 +11,7 @@ public class planetPhysics : MonoBehaviour{
     int simulationLength; 
     public planetManager PlanetManager; 
     public managerSimulation ManagerSimulation;
-    public int Number_Planets_In_Simulation;
+     int Number_Planets_In_Simulation;
     public List<Transform> Transforms_In_Simulation;
     public List<planetManager.secondaryTransform> secondaryTransforms_In_Simulation;
     public float SunMass;
