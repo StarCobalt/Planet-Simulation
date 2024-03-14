@@ -9,7 +9,7 @@ public class managerSimulation : MonoBehaviour
     public planetManager PlanetManager;
     public planetPhysics PlanetPhysics;
     //Simulation
-    public int _simulationLength = 100;
+    public int _simulationLength = 400;
 
     //Planets
     public Vector3[,] planetPositionData;
@@ -20,10 +20,10 @@ public class managerSimulation : MonoBehaviour
     bool PhysicsDataRecieved = false;
     bool ManagerDataRecieved = false;
     public bool simulationYes = false;
+    
     void Start()
     {
-        _simulationLength = 100;
-        
+        _simulationLength = 1400;
     }
 
    
@@ -34,19 +34,23 @@ public class managerSimulation : MonoBehaviour
             simulationYes = !simulationYes;
             
         }
-        StartCoroutine("movePlanets");
-        
+        if (ManagerDataRecieved && PhysicsDataRecieved && simulationYes){
+            StartCoroutine(nameof(movePlanets));
+            simulationYes = false;
+            
+        }
     }
     IEnumerator movePlanets(){
-        if (PhysicsDataRecieved && ManagerDataRecieved && simulationYes){
-            for (int simulationTimeStep = 0; simulationTimeStep < _simulationLength; simulationTimeStep++){
+        
+        simulationYes = false;
+            for (int simulationTimeStep = 0; simulationTimeStep < _simulationLength ; simulationTimeStep++){
                for (int planet = 0; planet < Number_Planets__Simulation; planet++){
                   planets_In_Simulation[planet].mainOrgan.transform.position = planetPositionData[planet,simulationTimeStep];
                }
-               print(simulationTimeStep);
-               yield return null;
+               //print(simulationTimeStep);
+               yield return new WaitForSeconds(0.04f);
             }
-        }   
+            
         
     }
     //Simulation Manager

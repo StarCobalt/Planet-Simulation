@@ -169,14 +169,14 @@ public class planetManager : MonoBehaviour
     void Start(){
              SUN_MASS = 8800;
              Sun sun = new(testPrefab,SUN_MASS);
-             Amount_Planets_In_Simulation = Random.Range(9,25);
+             Amount_Planets_In_Simulation = Random.Range(9,45);
              Transforms_In_Simulation = new List<Transform>();
              secondaryTransforms_In_Simulation = new List<secondaryTransform>();
              Planets_In_Simulation = new List<PlanetaryOrgan>();
 
              //Simulation Manager
              simulationLength = ManagerSimulation.SetSimulationLength();
-             print(simulationLength);
+             //print(simulationLength);
              planetPositionData = new Vector3[Amount_Planets_In_Simulation,simulationLength];
              
              for (int i = 0; i < Amount_Planets_In_Simulation; i++){
@@ -186,9 +186,9 @@ public class planetManager : MonoBehaviour
               PlanetaryOrgan planet = new(testPrefab,$"{i}",material1,sun.mass,gravitationalConstant);
                             
               //trail
-              TrailRenderer trail = Instantiate(trailb);
-              trail.transform.parent = planet.Object_Transform;
-              trail.transform.position = planet.Object_Transform.position;
+              //TrailRenderer trail = Instantiate(trailb);
+              //trail.transform.parent = planet.Object_Transform;
+              //trail.transform.position = planet.Object_Transform.position;
               
               planetPositionData[i,0] = planet.position;
    
@@ -280,14 +280,6 @@ public struct secondaryTransform{
 
   //Physics
    // void Update()
-//To-Do List
-//Stop Simulation at any time P In Progress
-//Collision Destruction (in progress)
-//Stars
-//Different Types of Planets/Stars/Comets/Asteroids/Meteors in progress
-//Low Density Planets identified as gas giants/planets in progress
-//Classification Identification for all Celestial Bodies in progress
-//Simulation Length
 
    // {
       //  for (int i = 0; i < Number_Planets_In_Simulation;i++){
