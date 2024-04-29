@@ -5,9 +5,8 @@ using UnityEngine;
 public class managerSimulation : MonoBehaviour
 {
 
-    //Scripts
+    //Script
     public planetManager PlanetManager;
-    public planetPhysics PlanetPhysics;
     //Simulation
     public int _simulationLength = 400;
 
@@ -17,7 +16,6 @@ public class managerSimulation : MonoBehaviour
     int Number_Planets__Simulation;
 
     //Simulation Approvitations
-    bool PhysicsDataRecieved = false;
     bool ManagerDataRecieved = false;
     public bool simulationYes = false;
     
@@ -34,7 +32,7 @@ public class managerSimulation : MonoBehaviour
             simulationYes = !simulationYes;
             
         }
-        if (ManagerDataRecieved && PhysicsDataRecieved && simulationYes){
+        if (ManagerDataRecieved && simulationYes){
             StartCoroutine(nameof(movePlanets));
             simulationYes = false;
             
@@ -58,14 +56,11 @@ public class managerSimulation : MonoBehaviour
     public int SetSimulationLength(){
         return _simulationLength;
     }
-    public void GetPositionData(Vector3[,] PlanetPositionData){
-        planetPositionData = PlanetPositionData;
-        PhysicsDataRecieved = true;
-
-    }
-    public void GetPlanetData(List<planetManager.PlanetaryOrgan> Organs , int Number_Planets_Simulation){
+   
+    public void GetPlanetData(List<planetManager.PlanetaryOrgan> Organs , int Number_Planets_Simulation, Vector3[,] positionData){
         planets_In_Simulation = Organs;
         ManagerDataRecieved = true;
         Number_Planets__Simulation = Number_Planets_Simulation;
+        planetPositionData = positionData;
     }
 }

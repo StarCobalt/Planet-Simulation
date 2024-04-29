@@ -1,6 +1,7 @@
 
 
 
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,17 +10,83 @@ public class planetManager : MonoBehaviour
 
     
   
-   //Variables
-   public planetPhysics planet_physics;
-   public managerSimulation ManagerSimulation;
-   public float SUN_MASS;
-   public float gravitationalConstant;
-   int simulationLength;
-   public Vector3[,] planetPositionData;
    
   //Functions
-  string recognizeType(float density, float Mass, Vector3 size){
-    return "";
+  string recognizeType(float per_density, float per_distance, float per_size, ){
+    string densityLevel = "";
+    switch(per_density){
+      case < 0.1f :
+        densityLevel = "Cloud of";
+        break;
+      case < 0.2f :
+        densityLevel = "Gas";
+        break;
+      case < 0.35f :
+        densityLevel= "Lightweight";
+        break;
+      case < 0.64f :
+        densityLevel = "";
+        break;
+      case < 0.72f :
+        densityLevel = "Heavy";
+        break;
+      case < 0.79f : 
+        densityLevel = "Massive";
+        break;
+      case < 0.91f :
+        densityLevel = "Dense";
+        break;
+      case <= 1 :
+        densityLevel = "Heavy Heavy Heavy";
+        break;        
+     }
+     string sizeLevel = "";
+      switch(per_size){
+        case < 0.06f : 
+          sizeLevel = "Dust";
+          break;
+        case < 0.29f :
+          sizeLevel = "Asteroid";
+          break;
+        case < 0.75f :
+          sizeLevel = "Planet";
+          break;
+        case < 0.9f :
+          switch(per_distance){
+            case < 0.4f :
+                sizeLevel = "Hot Giant";
+                break;
+            case < 0.8f : 
+              sizeLevel = "Super Giant";
+              break;
+            case < 1 :
+              sizeLevel = "Ice Giant";
+              break;
+          }
+          break;
+        case <= 1f :
+          sizeLevel = "???";
+          break;
+       }
+
+       return $"{densityLevel}-{sizeLevel}";
+  }
+  float calculateGravity(float amass, float bmass, Vector3 aposition, Vector3 bposition, Vector3 differencebetweenAB, float diameterBetweenCenters){
+       
+      //Operatives
+      float distanceBetweenCenters = differencebetweenAB.magnitude; //find distance
+      float gravitationForce = -9000;
+
+       if (distanceBetweenCenters > diameterBetweenCenters){
+         //Gravity
+         float distanceBetweenCentersSqr = differencebetweenAB.sqrMagnitude;
+        float CollectiveMass = amass * bmass;
+          gravitationForce = (gravitationalConstant * CollectiveMass) / distanceBetweenCentersSqr;
+        //Debug
+         //print($"gravitationForce : \n{gravitationForce}");
+      }
+        
+      return gravitationForce; 
   }
   
 
@@ -83,6 +150,8 @@ public class planetManager : MonoBehaviour
         //Constructor
         public PlanetaryOrgan(GameObject prefab, string Name, Material planetMaterial, float Sun_mass, float gravitationalCons){
             
+           
+
             
             //position
             float distance = Random.Range(worldSizeMinMax.x,worldSizeMinMax.y);
@@ -96,35 +165,6 @@ public class planetManager : MonoBehaviour
             startingVelocity = Quaternion.AngleAxis(90,Vector3.forward) * position.normalized * mean_orbital_Speed * (Random.Range(0,2)*2-1);
             //Debug
             //print(mean_orbital_Speed);
-              
-            
-            
-           
-            
-            
-            //Name Choosing
-            planetName = "Unidentified Space Object";
-            switch(diameter/diameterMinMax.y){
-              case < 1/1430: 
-                planetName = "Asteroid";
-                break;
-              case  < 1/44f:
-                planetName = "Moon";
-                break;
-              case <= 1/11f:
-                planetName = "Planet"; 
-                break;
-              case <= 4/11f:
-                planetName = "SuperPlanet"; 
-                break;
-              case <= 1:
-                planetName = "Gas Giant";
-                break;
-              default :
-                break;
-            }
-
-            
             //Making of a New Planet
             
             mainOrgan = Instantiate(prefab);
@@ -145,22 +185,23 @@ public class planetManager : MonoBehaviour
             
       }
     }
+    
     //Variables
     
-   
     public TrailRenderer trailb;
+    [SerializeField] int Amount_Planets_In_Simulation;
+    int simulationLength;
     public List<Transform> Transforms_In_Simulation;
     public List<secondaryTransform> secondaryTransforms_In_Simulation;
     public List<PlanetaryOrgan> Planets_In_Simulation;
-    [SerializeField] int Amount_Planets_In_Simulation;
-    
-    
+    public managerSimulation ManagerSimulation;
+    public float SUN_MASS;
+    public float gravitationalConstant;
+    public Vector3[,] planetPositionData;
 
 
     
     
-
-
 
 
 
@@ -174,33 +215,83 @@ public class planetManager : MonoBehaviour
              secondaryTransforms_In_Simulation = new List<secondaryTransform>();
              Planets_In_Simulation = new List<PlanetaryOrgan>();
 
-             //Simulation Manager
+                //Simulation Manager
              simulationLength = ManagerSimulation.SetSimulationLength();
-             //print(simulationLength);
+                //print(simulationLength);
              planetPositionData = new Vector3[Amount_Planets_In_Simulation,simulationLength];
              
-             for (int i = 0; i < Amount_Planets_In_Simulation; i++){
-              //Debug
-              //print(i);
-              Material material1 = materials[Random.Range(0,8)];
-              PlanetaryOrgan planet = new(testPrefab,$"{i}",material1,sun.mass,gravitationalConstant);
+            for (int i = 0; i < Amount_Planets_In_Simulation; i++){
+
+                Material material1 = materials[Random.Range(0,8)];
+                PlanetaryOrgan planet = new(testPrefab,$"{i}",material1,sun.mass);
                             
-              //trail
-              //TrailRenderer trail = Instantiate(trailb);
-              //trail.transform.parent = planet.Object_Transform;
-              //trail.transform.position = planet.Object_Transform.position;
-              
-              planetPositionData[i,0] = planet.position;
-   
-              Transforms_In_Simulation.Add(planet.Object_Transform);
-              secondaryTransforms_In_Simulation.Add(planet.Object_secondary_Transform);
-              Planets_In_Simulation.Add(planet);
-             }
-             planet_physics.Ask_For_SimulationData(Transforms_In_Simulation,Planets_In_Simulation,secondaryTransforms_In_Simulation,SUN_MASS,planetPositionData);
-             ManagerSimulation.GetPlanetData(Planets_In_Simulation, Amount_Planets_In_Simulation);
-          
-          
-    }      
+                planetPositionData[i,0] = planet.position;
+                Transforms_In_Simulation.Add(planet.Object_Transform);
+                secondaryTransforms_In_Simulation.Add(planet.Object_secondary_Transform);
+                Planets_In_Simulation.Add(planet);
+
+             
+              for(int simulationTimeStep = 1; simulationTimeStep < simulationLength; simulationTimeStep++){
+                  
+                  secondaryTransform a = secondaryTransforms_In_Simulation[i];
+                  Transform ap = Transforms_In_Simulation[i];
+                  
+                  Vector3 CurrentVelocity = new(0,0,0);
+
+                  Vector3 A_prevPosition = planetPositionData[i,simulationTimeStep - 1];
+                  CurrentVelocity -= SUN_MASS * a.mass/A_prevPosition.sqrMagnitude * gravitationalConstant * A_prevPosition.normalized;
+                        
+                  for (int j = 0; j < Amount_Planets_In_Simulation && j != i;j++){
+                
+                      
+                      if (i == j){
+                        continue;
+                      }
+                      
+                        Material material2 = materials[Random.Range(0,8)];
+                        PlanetaryOrgan planetj = new(testPrefab,$"{i}",material2,sun.mass,gravitationalConstant); 
+                        planetPositionData[j,0] = planetj.position;
+                    
+                        Transforms_In_Simulation.Add(planetj.Object_Transform);
+                        secondaryTransforms_In_Simulation.Add(planetj.Object_secondary_Transform);
+                        Planets_In_Simulation.Add(planetj);
+                      
+                      
+                      //Variables/Fields
+                      secondaryTransform b = secondaryTransforms_In_Simulation[j];
+                      Transform bp = Transforms_In_Simulation[j];
+                 
+                      Vector3 B_prevPosition = planetPositionData[j,simulationTimeStep - 1];
+                      Vector3 DifferenceBetweenAB = B_prevPosition - A_prevPosition;
+
+                      float gravitationForce = calculateGravity(a.mass, b.mass, A_prevPosition, B_prevPosition, DifferenceBetweenAB,(ap.localScale +bp.localScale)/2);
+                
+                      if (gravitationForce == -9000){//Something is In the Way
+                        //Destroy(Planets_In_Simulation[i].mainOrgan);
+                        //secondaryTransforms_In_Simulation.RemoveAt(i);
+                        //Transforms_In_Simulation.RemoveAt(i);
+                      }else{ 
+
+                        Vector3 direction = DifferenceBetweenAB.normalized;
+                        Vector3 PlanetForce = direction * gravitationForce;
+                        CurrentVelocity += PlanetForce;
+
+                      }
+                    }
+
+                  //Motion
+                  Vector3 FinalAcceleration =  (CurrentVelocity + a.velocity) * gravitationalConstant;
+                  secondaryTransforms_In_Simulation[i] = new secondaryTransform(a.mass,a.velocity + CurrentVelocity,a.density,FinalAcceleration);
+                  //Round to The Nearest Decimal Point
+                  FinalAcceleration = new Vector3(Mathf.Round(FinalAcceleration.x*1000)/1000,Mathf.Round(FinalAcceleration.y*1000)/1000,Mathf.Round(FinalAcceleration.z*1000)/1000);
+                  planetPositionData[i, simulationTimeStep] = A_prevPosition + FinalAcceleration;
+
+              }
+            }
+            
+            ManagerSimulation.GetPlanetData(Planets_In_Simulation, Amount_Planets_In_Simulation, planetPositionData);
+    }
+      
 
 
 
